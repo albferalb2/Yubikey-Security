@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YubiKey Custom ID Registrar</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    h1 { color: #333; }
+    label, input, button { font-size: 16px; margin: 5px 0; display: block; }
+    button { padding: 8px 16px; margin-top: 10px; }
+    pre { background: #fff; padding: 10px; border: 1px solid #ccc; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🔐 YubiKey Custom ID Registrar</h1>
+  <label for="customId">Nombre o ID para esta llave:</label>
+  <input type="text" id="customId" placeholder="Ej: Key_001">
+  <button onclick="registerKey()">Registrar y guardar</button>
+  <button onclick="exportData()">📁 Exportar como CSV</button>
+  <pre id="output">Esperando registro...</pre>
+
+  <script>
+    let keyList = [];
+
+    async function registerKey() {
+      const customId = document.getElementById("customId").value.trim();
+      if (!customId) {
+        alert("Por favor introduce un ID personalizado para esta llave.");
+        return;
+      }
+
+      const publicKey = {
+        challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
+        rp: { name: "Local Tool", id: window.location.hostname || "localhost" },
+        user: {
+          id: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(8))),
+          name: customId + "@example.com",
+          displayName: customId
+        },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+        timeout: 60000,
+        attestation: "none",
+        authenticatorSelection: {
+          authenticatorAttachment: "cross-platform",
+          userVerification: "preferred"
+        }
+      };
+
+      try {
+        const credential = await navigator.credentials.create({ publicKey });
+        const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+        const entry = {
+          id: customId,
+          credentialId: rawId,
+          timestamp: new Date().toLocaleString()
+        };
+
+        keyList.push(entry);
+        document.getElementById("output").textContent += 
+          `\n✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
+        document.getElementById("customId").value = "";
+      } catch (err) {
+        document.getElementById("output").textContent += "\n❌ Error: " + err.message;
+      }
+    }
+
+    function exportData() {
+      if (keyList.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+
+      let csvContent = "ID Personalizado,Credential ID,Fecha y Hora\n";
+      keyList.forEach(entry => {
+        csvContent += `"${entry.id}","${entry.credentialId}","${entry.timestamp}"\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "yubikeys.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
