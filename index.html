@@ -42,19 +42,19 @@
         out.textContent = "No hay claves registradas.";
         return;
       }
-      out.innerHTML = "";
+    out.innerHTML = "";
       keyList.forEach((entry, index) => {
         const div = document.createElement("div");
         div.className = "entry";
-    div.innerHTML = `
-  <span>
-    <strong>✅ ${entry.id}</strong>
-    <div style="font-size: 12px; word-break: break-all; color: #444;">${entry.credentialId}</div>
-    <small>${entry.timestamp}</small>
-  </span>
-  <button onclick="deleteKey(${index})">🗑️ Borrar</button>
-`;
-out.appendChild(div);
+        div.innerHTML = `
+          <span>
+            <strong>✅ ${entry.id}</strong><br>
+            <pre>${entry.credentialId}</pre>
+            <small>${entry.timestamp}</small>
+          </span>
+          <button onclick="deleteKey(${index})">🗑️ Borrar</button>
+        `;
+        out.appendChild(div);
       });
     }
 
