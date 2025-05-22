@@ -21,53 +21,56 @@
   <script>
     let keyList = [];
 
-    async function registerKey() {
-      const customId = document.getElementById("customId").value.trim();
-      if (!customId) {
-        alert("Por favor introduce un ID personalizado para esta llave.");
-        return;
-      }
+   async function registerKey() {
+  const customId = document.getElementById("customId").value.trim();
+  if (!customId) {
+    alert("Por favor introduce un ID personalizado para esta llave.");
+    return;
+  }
 
-      if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
-        alert(" El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
-        return;
-      }
+  if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
+    alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
+    return;
+  }
 
-      const publicKey = {
-        challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
-        rp: { name: "Local Tool", id: window.location.hostname || "localhost" },
-        user: {
-          id: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(8))),
-          name: customId + "@example.com",
-          displayName: customId
-        },
-        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-        timeout: 60000,
-        attestation: "none",
-        authenticatorSelection: {
-          authenticatorAttachment: "cross-platform",
-          userVerification: "discouraged" // ✅ No pedirá contraseña, solo toque
-        }
-      };
-
-      try {
-        const credential = await navigator.credentials.create({ publicKey });
-        const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-
-        const entry = {
-          id: customId,
-          credentialId: rawId,
-          timestamp: new Date().toLocaleString()
-        };
-
-        keyList.push(entry);
-        document.getElementById("output").textContent += 
-          `\n✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
-        document.getElementById("customId").value = "";
-      } catch (err) {
-        document.getElementById("output").textContent += "\n❌ Error: " + err.message;
-      }
+  const publicKey = {
+    challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
+    rp: { name: "Local Tool", id: window.location.hostname || "localhost" },
+    user: {
+      id: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(8))),
+      name: customId + "@example.com",
+      displayName: customId
+    },
+    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+    timeout: 60000,
+    attestation: "none",
+    authenticatorSelection: {
+      authenticatorAttachment: "cross-platform",
+      userVerification: "discouraged" // ✅ Solo toque, sin PIN
     }
+  };
+
+  document.getElementById("output").textContent += `\n⏳ Esperando toque en la YubiKey (${customId})...\n`;
+
+  try {
+    const credential = await navigator.credentials.create({ publicKey });
+    const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+
+    const entry = {
+      id: customId,
+      credentialId: rawId,
+      timestamp: new Date().toLocaleString()
+    };
+
+    keyList.push(entry);
+    document.getElementById("output").textContent += 
+      `✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
+    document.getElementById("customId").value = "";
+  } catch (err) {
+    document.getElementById("output").textContent += `❌ Error: ${err.message}\n---`;
+  }
+}
+
   </script>
 </body>
 </html>
