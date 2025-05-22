@@ -29,7 +29,7 @@
         return;
       }
 
-      // Verificar si el ID personalizado ya existe (sin distinguir mayúsculas)
+      // ✅ Verificar si el ID personalizado ya existe (sin distinguir mayúsculas)
       if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
         alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
         return;
@@ -55,13 +55,6 @@
       try {
         const credential = await navigator.credentials.create({ publicKey });
         const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-
-        // Verificar si esta credentialId ya está registrada
-        if (keyList.some(entry => entry.credentialId === rawId)) {
-          alert("❌ Esta llave ya ha sido registrada anteriormente.");
-          document.getElementById("output").textContent += `\n⚠️ Rechazado: llave ya registrada.\n---`;
-          return;
-        }
 
         const entry = {
           id: customId,
