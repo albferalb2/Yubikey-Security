@@ -9,8 +9,11 @@
     h1  { color: #333; }
     label, input, button { font-size: 16px; margin: 5px 0; display: block; }
     button { padding: 8px 16px; margin-top: 10px; cursor: pointer; }
-    pre    { background: #fff; padding: 10px; border: 1px solid #ccc;
-             margin-top: 20px; white-space: pre-wrap; }
+    .entry { background: #fff; border: 1px solid #ccc; padding: 10px;
+             display: flex; justify-content: space-between; align-items: center;
+             margin-top: 8px; white-space: pre-wrap; }
+    .entry span { flex-grow: 1; }
+    .entry button { background: #ff4d4d; color: white; border: none; padding: 6px 10px; }
   </style>
 </head>
 <body>
@@ -18,19 +21,43 @@
 
   <label for="customId">Nombre o ID para esta llave:</label>
   <input type="text" id="customId" placeholder="Ej: Key_001">
-
   <button onclick="registerKey()">Registrar y guardar</button>
 
-  <pre id="output">Esperando registro...</pre>
+  <div id="output">Esperando registro...</div>
 
   <script>
     let keyList = [];
 
-    // Cargar datos guardados al iniciar
-    if (localStorage.getItem("yubikeys")) {
-      keyList = JSON.parse(localStorage.getItem("yubikeys"));
-      document.getElementById("output").textContent = "🔁 Datos cargados:\n" +
-        keyList.map(e => `✅ ${e.id} – ${e.timestamp}`).join("\n") + "\n---";
+    // Cargar claves guardadas
+    function loadKeys() {
+      if (localStorage.getItem("yubikeys")) {
+        keyList = JSON.parse(localStorage.getItem("yubikeys"));
+        renderList();
+      }
+    }
+
+    function renderList() {
+      const out = document.getElementById("output");
+      if (keyList.length === 0) {
+        out.textContent = "No hay claves registradas.";
+        return;
+      }
+      out.innerHTML = "";
+      keyList.forEach((entry, index) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `<span>✅ ${entry.id} – ${entry.timestamp}</span>
+                         <button onclick="deleteKey(${index})">🗑️ Borrar</button>`;
+        out.appendChild(div);
+      });
+    }
+
+    function deleteKey(index) {
+      if (confirm("¿Estás seguro de borrar esta llave?")) {
+        keyList.splice(index, 1);
+        localStorage.setItem("yubikeys", JSON.stringify(keyList));
+        renderList();
+      }
     }
 
     async function registerKey() {
@@ -61,8 +88,8 @@
         }
       };
 
-      document.getElementById("output").textContent +=
-        `\n⏳ Esperando toque en la YubiKey (${customId})...\n`;
+      document.getElementById("output").innerHTML +=
+        `<div class="entry"><span>⏳ Esperando toque en la YubiKey (${customId})...</span></div>`;
 
       try {
         const credential = await navigator.credentials.create({ publicKey });
@@ -70,8 +97,7 @@
 
         if (keyList.some(e => e.credentialId === rawId)) {
           alert("❌ Esta Security Key ya ha sido registrada con otro ID.");
-          document.getElementById("output").textContent +=
-            `⛔ Rechazado: esta llave ya fue usada.\n---`;
+          renderList();
           return;
         }
 
@@ -82,15 +108,17 @@
         };
 
         keyList.push(entry);
-        localStorage.setItem("yubikeys", JSON.stringify(keyList)); // Guardar en localStorage
-
-        document.getElementById("output").textContent +=
-          `✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
+        localStorage.setItem("yubikeys", JSON.stringify(keyList));
         document.getElementById("customId").value = "";
+        renderList();
       } catch (err) {
-        document.getElementById("output").textContent += `❌ Error: ${err.message}\n---`;
+        alert("❌ Error: " + err.message);
+        renderList();
       }
     }
+
+    // Inicializar
+    loadKeys();
   </script>
 </body>
 </html>
