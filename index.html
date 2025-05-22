@@ -14,7 +14,6 @@
              margin-top: 8px; white-space: pre-wrap; }
     .entry span { flex-grow: 1; }
     .entry button { background: #ff4d4d; color: white; border: none; padding: 6px 10px; }
-    pre { font-size: 12px; color: #444; margin: 4px 0 0 0; }
   </style>
 </head>
 <body>
@@ -29,6 +28,7 @@
   <script>
     let keyList = [];
 
+    // Cargar claves guardadas
     function loadKeys() {
       if (localStorage.getItem("yubikeys")) {
         keyList = JSON.parse(localStorage.getItem("yubikeys"));
@@ -42,18 +42,12 @@
         out.textContent = "No hay claves registradas.";
         return;
       }
-    out.innerHTML = "";
+      out.innerHTML = "";
       keyList.forEach((entry, index) => {
         const div = document.createElement("div");
         div.className = "entry";
-        div.innerHTML = `
-          <span>
-            <strong>✅ ${entry.id}</strong>
-            <pre>Credential ID${entry.credentialId}</pre>
-            <small>${entry.timestamp}</small>
-          </span>
-          <button onclick="deleteKey(${index})">🗑️ Borrar</button>
-        `;
+        div.innerHTML = `<span>✅ ${entry.id} – ${entry.timestamp}</span>
+                         <button onclick="deleteKey(${index})">🗑️ Borrar</button>`;
         out.appendChild(div);
       });
     }
@@ -123,6 +117,7 @@
       }
     }
 
+    // Inicializar
     loadKeys();
   </script>
 </body>
