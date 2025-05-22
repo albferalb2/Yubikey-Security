@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,18 +5,22 @@
   <title>YubiKey Custom ID Registrar</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
-    h1 { color: #333; }
+    h1  { color: #333; }
     label, input, button { font-size: 16px; margin: 5px 0; display: block; }
     button { padding: 8px 16px; margin-top: 10px; cursor: pointer; }
-    pre { background: #fff; padding: 10px; border: 1px solid #ccc; margin-top: 20px; white-space: pre-wrap; }
+    pre    { background: #fff; padding: 10px; border: 1px solid #ccc;
+             margin-top: 20px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <h1>YubiKey Custom ID Registrar</h1>
+
   <label for="customId">Nombre o ID para esta llave:</label>
   <input type="text" id="customId" placeholder="Ej: Key_001">
+
   <button onclick="registerKey()">Registrar y guardar</button>
-  <button onclick="exportData()">📁 Exportar como CSV</button>
+  <button onclick="exportJSON()">💾 Exportar como JSON</button>
+
   <pre id="output">Esperando registro...</pre>
 
   <script>
@@ -29,8 +32,7 @@
         alert("Por favor introduce un ID personalizado para esta llave.");
         return;
       }
-
-      if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
+      if (keyList.some(e => e.id.toLowerCase() === customId.toLowerCase())) {
         alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
         return;
       }
@@ -52,14 +54,17 @@
         }
       };
 
+      document.getElementById("output").textContent +=
+        `\n⏳ Esperando toque en la YubiKey (${customId})...\n`;
+
       try {
         const credential = await navigator.credentials.create({ publicKey });
         const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
 
-        if (keyList.some(entry => entry.credentialId === rawId)) {
+        if (keyList.some(e => e.credentialId === rawId)) {
           alert("❌ Esta Security Key ya ha sido registrada con otro ID.");
-          document.getElementById("output").textContent += `⛔ Rechazado: esta llave ya fue usada.
----`;
+          document.getElementById("output").textContent +=
+            `⛔ Rechazado: esta llave ya fue usada.\n---`;
           return;
         }
 
@@ -70,7 +75,7 @@
         };
 
         keyList.push(entry);
-        document.getElementById("output").textContent += 
+        document.getElementById("output").textContent +=
           `✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
         document.getElementById("customId").value = "";
       } catch (err) {
@@ -78,25 +83,21 @@
       }
     }
 
-    function exportData() {
+    function exportJSON() {
       if (keyList.length === 0) {
         alert("No hay datos para exportar.");
         return;
       }
-
-      let csvContent = "ID Personalizado,Credential ID,Fecha y Hora\n";
-      keyList.forEach(entry => {
-        csvContent += `"${entry.id}","${entry.credentialId}","${entry.timestamp}"\n`;
-      });
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const json = JSON.stringify(keyList, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "yubikeys.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "yubikeys.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>
