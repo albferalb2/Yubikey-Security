@@ -28,9 +28,8 @@
         return;
       }
 
-      // ✅ Verificar si el ID personalizado ya existe (sin distinguir mayúsculas)
       if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
-        alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
+        alert(" El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
         return;
       }
 
