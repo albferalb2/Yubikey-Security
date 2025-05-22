@@ -21,13 +21,14 @@
   <script>
     let keyList = [];
 
-   async function registerKey() {
+async function registerKey() {
   const customId = document.getElementById("customId").value.trim();
   if (!customId) {
     alert("Por favor introduce un ID personalizado para esta llave.");
     return;
   }
 
+  // Verificar que el nombre no esté repetido
   if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
     alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
     return;
@@ -46,7 +47,7 @@
     attestation: "none",
     authenticatorSelection: {
       authenticatorAttachment: "cross-platform",
-      userVerification: "discouraged" // ✅ Solo toque, sin PIN
+      userVerification: "discouraged"
     }
   };
 
@@ -55,6 +56,13 @@
   try {
     const credential = await navigator.credentials.create({ publicKey });
     const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+
+    // 🔒 Evitar que la misma llave física se registre más de una vez
+    if (keyList.some(entry => entry.credentialId === rawId)) {
+      alert("❌ Esta Security Key ya ha sido registrada con otro ID.");
+      document.getElementById("output").textContent += `⛔ Rechazado: esta llave ya fue usada.\n---`;
+      return;
+    }
 
     const entry = {
       id: customId,
@@ -70,6 +78,7 @@
     document.getElementById("output").textContent += `❌ Error: ${err.message}\n---`;
   }
 }
+
 
   </script>
 </body>
