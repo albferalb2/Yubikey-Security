@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,11 +26,11 @@
   <script>
     let keyList = [];
 
-    // ✅ Cargar datos guardados al abrir la página
+    // Cargar datos guardados al iniciar
     if (localStorage.getItem("yubikeys")) {
       keyList = JSON.parse(localStorage.getItem("yubikeys"));
       document.getElementById("output").textContent = "🔁 Datos cargados:\n" +
-        keyList.map(e => `✅ ${e.id} – ${e.timestamp}`).join("\\n") + "\\n---";
+        keyList.map(e => `✅ ${e.id} – ${e.timestamp}`).join("\n") + "\n---";
     }
 
     async function registerKey() {
@@ -81,7 +82,7 @@
         };
 
         keyList.push(entry);
-        localStorage.setItem("yubikeys", JSON.stringify(keyList)); // ✅ Guardar en localStorage
+        localStorage.setItem("yubikeys", JSON.stringify(keyList)); // Guardar en localStorage
 
         document.getElementById("output").textContent +=
           `✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
