@@ -46,7 +46,7 @@
       keyList.forEach((entry, index) => {
         const div = document.createElement("div");
         div.className = "entry";
-        div.innerHTML = `<span>✅ ${entry.id} – ${entry.timestamp} -<br> CredentialID:  ${entry.credentialId}</span>
+        div.innerHTML = `<span>${entry.id} – ${entry.timestamp} -<br> CredentialID:  ${entry.credentialId}</span>
                          <button onclick="deleteKey(${index})">🗑️ Borrar</button>`;
         out.appendChild(div);
       });
@@ -67,7 +67,7 @@
         return;
       }
       if (keyList.some(e => e.id.toLowerCase() === customId.toLowerCase())) {
-        alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
+        alert(" El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
         return;
       }
 
@@ -96,7 +96,7 @@
         const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
 
         if (keyList.some(e => e.credentialId === rawId)) {
-          alert("❌ Esta Security Key ya ha sido registrada con otro ID.");
+          alert("Esta Security Key ya ha sido registrada con otro ID.");
           renderList();
           return;
         }
@@ -112,7 +112,7 @@
         document.getElementById("customId").value = "";
         renderList();
       } catch (err) {
-        alert("❌ Error: " + err.message);
+        alert("Error: " + err.message);
         renderList();
       }
     }
