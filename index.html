@@ -16,7 +16,6 @@
   <label for="customId">Nombre o ID para esta llave:</label>
   <input type="text" id="customId" placeholder="Ej: Key_001">
   <button onclick="registerKey()">Registrar y guardar</button>
-  <button onclick="exportData()">📁 Exportar como CSV</button>
   <pre id="output">Esperando registro...</pre>
 
   <script>
@@ -71,11 +70,7 @@
       }
     }
 
-    function exportData() {
-      if (keyList.length === 0) {
-        alert("No hay datos para exportar.");
-        return;
-      }
+    
 
       let csvContent = "ID Personalizado,Credential ID,Fecha y Hora\n";
       keyList.forEach(entry => {
