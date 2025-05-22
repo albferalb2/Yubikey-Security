@@ -19,12 +19,18 @@
   <input type="text" id="customId" placeholder="Ej: Key_001">
 
   <button onclick="registerKey()">Registrar y guardar</button>
-  <button onclick="exportJSON()">💾 Exportar como JSON</button>
 
   <pre id="output">Esperando registro...</pre>
 
   <script>
     let keyList = [];
+
+    // ✅ Cargar datos guardados al abrir la página
+    if (localStorage.getItem("yubikeys")) {
+      keyList = JSON.parse(localStorage.getItem("yubikeys"));
+      document.getElementById("output").textContent = "🔁 Datos cargados:\n" +
+        keyList.map(e => `✅ ${e.id} – ${e.timestamp}`).join("\\n") + "\\n---";
+    }
 
     async function registerKey() {
       const customId = document.getElementById("customId").value.trim();
@@ -75,29 +81,14 @@
         };
 
         keyList.push(entry);
+        localStorage.setItem("yubikeys", JSON.stringify(keyList)); // ✅ Guardar en localStorage
+
         document.getElementById("output").textContent +=
           `✅ Registrado: ${entry.id}\nCredential ID: ${entry.credentialId}\nHora: ${entry.timestamp}\n---`;
         document.getElementById("customId").value = "";
       } catch (err) {
         document.getElementById("output").textContent += `❌ Error: ${err.message}\n---`;
       }
-    }
-
-    function exportJSON() {
-      if (keyList.length === 0) {
-        alert("No hay datos para exportar.");
-        return;
-      }
-      const json = JSON.stringify(keyList, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "yubikeys.json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
     }
   </script>
 </body>
