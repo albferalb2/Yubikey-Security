@@ -46,7 +46,7 @@
       keyList.forEach((entry, index) => {
         const div = document.createElement("div");
         div.className = "entry";
-        div.innerHTML = `<span>✅ ${entry.id} – ${entry.timestamp}</span>
+        div.innerHTML = `<span>✅ ${entry.id} – ${entry.timestamp} -${entry.credentialId}</span>
                          <button onclick="deleteKey(${index})">🗑️ Borrar</button>`;
         out.appendChild(div);
       });
