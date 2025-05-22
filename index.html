@@ -29,6 +29,12 @@
         return;
       }
 
+      // Verificar si el ID personalizado ya existe (sin distinguir mayúsculas)
+      if (keyList.some(entry => entry.id.toLowerCase() === customId.toLowerCase())) {
+        alert("⚠️ El nombre '" + customId + "' ya está en uso. Usa uno distinto.");
+        return;
+      }
+
       const publicKey = {
         challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
         rp: { name: "Local Tool", id: window.location.hostname || "localhost" },
